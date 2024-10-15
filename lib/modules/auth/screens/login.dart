@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../../../kernel/widgets/custom_text_field_password.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -11,7 +14,6 @@ class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isObscure = true;
 
   String? validateEmail(String? value) {
     final RegExp emailRegExp = RegExp(
@@ -57,41 +59,48 @@ class _LoginState extends State<Login> {
                   validator: validateEmail,
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _isObscure,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                      hintText: 'Contraseña',
-                      label: const Text('Contraseña'),
-                      hintStyle:
-                          const TextStyle(fontSize: 16, color: Colors.white38),
-                      suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _isObscure = !_isObscure;
-                            });
-                          },
-                          icon: Icon(_isObscure ? Icons.visibility : Icons.visibility_off)
-                        )
-                  ),
-                ),
-                const SizedBox(height: 48),
+                CustomTextFieldPassword(controller: _passwordController),
+                const SizedBox(height: 16),
                 SizedBox(
                   height: 48,
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         print('Datos: ${_emailController.text} - ${_passwordController.text}');
+                        try {
+                          final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: _emailController.text,
+                            password: _passwordController.text
+                          );
+                          print('Credenciales: $credential');
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'user-not-found') {
+                            print('Ningún usuario encontrado para ese correo electrónico.');
+                          } else if (e.code == 'wrong-password') {
+                            print('Contraseña incorrecta proporcionada para ese usuario.');
+                          }
+                        }
                       }
                     },
                     style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.pink,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16))),
+                      backgroundColor: Colors.pink,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                    ),
                     child: const Text('Iniciar Sesión'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: () => Navigator.pushNamed(context, '/register'),
+                  child: const Text(
+                    'Crear una cuenta', 
+                    style: TextStyle(
+                      color: Colors.blue, 
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.blue
+                    )
                   ),
                 )
               ],
