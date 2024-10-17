@@ -1,5 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../kernel/widgets/custom_text_field_password.dart';
 
@@ -74,10 +74,10 @@ class _LoginState extends State<Login> {
                             password: _passwordController.text
                           );
                           print('Credenciales: $credential');
-                        } on FirebaseAuthException catch (e) {
-                          if (e.code == 'user-not-found') {
+                        } on FirebaseAuthException catch (err) {
+                          if (err.code == 'user-not-found') {
                             print('Ningún usuario encontrado para ese correo electrónico.');
-                          } else if (e.code == 'wrong-password') {
+                          } else if (err.code == 'wrong-password') {
                             print('Contraseña incorrecta proporcionada para ese usuario.');
                           }
                         }
